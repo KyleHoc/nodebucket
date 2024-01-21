@@ -7,6 +7,7 @@
 // imports statements
 import { Component } from '@angular/core';
 
+//Create base layout component
 @Component({
   selector: 'app-base-layout',
   templateUrl: './base-layout.component.html',

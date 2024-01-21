@@ -7,6 +7,7 @@
 // imports statements
 import { Component } from '@angular/core';
 
+//Create home component
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',

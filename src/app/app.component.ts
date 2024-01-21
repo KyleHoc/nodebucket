@@ -7,6 +7,7 @@
 // imports statements
 import { Component } from '@angular/core';
 
+//Create and export app component
 @Component({
   selector: 'app-root',
   template: `
