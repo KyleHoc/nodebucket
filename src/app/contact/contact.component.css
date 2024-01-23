@@ -1,0 +1,35 @@
+.contact-container{
+  background-color: #343F4B;
+  margin-top: 5%;
+  font-family: "Lato", sans-serif;
+}
+
+.card{
+  background-color: #343F4B;
+  border: 15px #FFD740 solid;
+}
+
+h1{
+  color:#FFD740;
+  font-size: 3rem;
+  font-weight: 900;
+}
+
+p{
+  color: white;
+  font-weight: 900;
+}
+
+.card-body{
+  margin-top: 5%;
+  padding:0 5% 0 5%;
+}
+
+.text{
+  padding-top: 15%;
+}
+
+.map{
+  margin-bottom: 10%;
+  text-align: center;
+}

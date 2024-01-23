@@ -16,6 +16,7 @@ import { BaseLayoutComponent } from './layouts/base-layout/base-layout.component
 import { NavComponent } from './layouts/nav/nav.component';
 import { FooterComponent } from './layouts/footer/footer.component';
 import { TasksComponent } from './tasks/tasks.component';
+import { ContactComponent } from './contact/contact.component';
 
 //Create and export app module
 @NgModule({
@@ -26,6 +27,7 @@ import { TasksComponent } from './tasks/tasks.component';
     NavComponent,
     FooterComponent,
     TasksComponent,
+    ContactComponent,
   ],
   imports: [
     BrowserModule,

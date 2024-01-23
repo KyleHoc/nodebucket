@@ -37,6 +37,8 @@ const { mongo } = require("../utils/mongo");
  *         description: Employee ID must be a number
  *       '404':
  *         description: Unable to find employee with empId:
+ *       '500':
+ *         description: Server Exception
  */
 router.get("/:empId", (req, res, next) => {
   try {
