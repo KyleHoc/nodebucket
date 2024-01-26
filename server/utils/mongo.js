@@ -10,23 +10,24 @@
 
 //Require mongoClient
 const { MongoClient } = require("mongodb")
+const config = require("./config")
 
 //Store a db connection URL as a variable
-const MONGO_URL = "mongodb+srv://nodebucket_user:s3cret@cluster0.tydee4p.mongodb.net/nodebucket?retryWrites=true&w=majority"
+const MONGO_URL = config.dbUrl;
 
 //Connect to the database and output a message saying so to the console
 const mongo = async(operations, next) => {
   try {
     console.log("Connecting to db...")
 
-    //Await connection to the database
+    //Connect to MongoDB
     const client = await MongoClient.connect(MONGO_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
-    //Set client database as nodebucket
-    const db = client.db("nodebucket");
+    //Set database as nodebucket
+    const db = client.db(config.dbname);
     console.log("Connected to db.")
 
     //Await the connection to the database, and output a message stating its connected once successful
