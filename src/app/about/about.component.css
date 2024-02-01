@@ -1,0 +1,42 @@
+.about-container{
+  background-color: #343F4B;
+  margin-top: 5%;
+  font-family: "Lato", sans-serif;
+}
+
+.card{
+  background-color: #343F4B;
+  border: 15px #FFD740 solid;
+  padding-bottom: 3%;
+}
+
+h1{
+  color:#FFD740;
+  font-size: 3rem;
+  font-weight: 900;
+}
+
+p{
+  color: white;
+  font-weight: 900;
+  line-height: 28px;
+}
+
+.card-body{
+  margin-top: 5%;
+  padding:0 5% 0 5%;
+}
+
+.text{
+  padding-top: 2%;
+}
+
+.image{
+  height: 85%;
+  width: 85%;
+}
+
+.source, a{
+  color:#FFD740;
+  font-size: 14px;
+}

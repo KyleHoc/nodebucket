@@ -1,5 +1,5 @@
 //--------------------------------------------
-//Title: task.components.ts
+//Title: tasks.components.ts
 //Author: Kyle Hochdoerfer
 //Date: 01/24/24
 //Description: Typescript for task component
@@ -12,6 +12,7 @@ import { TaskService } from '../shared/task.service';
 import { Employee } from '../shared/employee.interface';
 import { Item } from '../shared/item.interface';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CdkDragDrop, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop'
 
 //Export and create the task component class
 @Component({
@@ -132,6 +133,73 @@ export class TasksComponent {
     })
   }
 
+  //Create a function for deleting tasks
+  deleteTask(taskId: string){
+    //Output the id of the task to detele
+    console.log(`Task Item: ${taskId}`)
+
+    //Confirm whether the user is sure that they want to delete the task or not
+    if(!confirm("Are you sure you want to delete this task?")){
+      return
+    }
+
+    //Call the delete task function and subscribe to the observable while passing in empId and taskId
+    this.taskService.deleteTask(this.empId, taskId).subscribe({
+      //If the task is deleted successfully, remove it from the task array
+      next: (res: any) => {
+        console.log('Task deleted with id ', taskId)
+
+        //If the todo or done arrays are null, set them to an empty array
+        if (!this.todo) this.todo = []
+        if (!this.todo) this.todo = []
+
+        //Filter the todo and done arrays to remove the deleted task
+        this.todo = this.todo.filter(t => t._id.toString() !== taskId)
+        this.done = this.done.filter(t => t._id.toString() !== taskId)
+
+        //Set the success message
+        this.successMessage = 'Task deleted'
+
+        //Hide the resulting alert after five seconds
+        this.hideAlert()
+      },
+      error: (err) => {
+        //If there is an error, log it to the console and set the error message
+        console.log('error', err);
+        this.errorMessage = err.message
+        this.hideAlert()
+      }
+    })
+  }
+
+  //Create a drop event for dragging and dropping task items between todo and done lists using cdkDragDrop
+  drop(event: CdkDragDrop<any[]>){
+    //If an item is dropped in the same container, move it to the new index
+    if (event.previousContainer === event.container){
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex)
+
+      //Log the result to the console
+      console.log('Moved item in array ', event.container.data)
+
+      //Call the update task list function and pass in empId, and the todo and done arrays
+      this.updateTaskList(this.empId, this.todo, this.done)
+    } else {
+      //If an item is dropped in a different container, move it there
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      )
+
+      //Log a message stating the result to the console
+      console.log('Moved item in array ', event.container.data)
+
+      //Call the updateTaskList function and pass in empId, todo, and done
+      this.updateTaskList(this.empId, this.todo, this.done)
+    }
+  }
+
   //Create a function that hides the error or success message after 5 seconds
   hideAlert(){
     //Set error and success message to be blank after 5 seconds
@@ -139,5 +207,22 @@ export class TasksComponent {
       this.errorMessage = ''
       this.successMessage = ''
     }, 5000)
+  }
+
+  //Create a function for updating the task arrays
+  updateTaskList(empId: number, todo: Item[], done: Item[]){
+    //Call the update task function from taskService and pass in empId, todo, and done
+    this.taskService.updateTask(empId, todo, done).subscribe({
+      //If the process was successful, log a success message to the console
+      next: (res: any) => {
+        console.log('Task updated successfully')
+      },
+      error: (err) => {
+        //In the event of an error, log the error message to the console and set errorMessage
+        console.log('error', err)
+        this.errorMessage = err.message
+        this.hideAlert()
+      }
+    })
   }
 }

@@ -17,11 +17,53 @@ const { ObjectId } = require('mongodb')
 
 const ajv = new Ajv()
 
+//Task schema for for employee document
+const taskSchema = {
+  type: 'object',
+  properties:{
+    text: { type: 'string'}
+  },
+  required: ["text"],
+  additionalProperties: false
+}
+
+//Tasks schema for validating todo and done lists
+const tasksSchema = {
+  type: 'object',
+  required: ['todo', 'done'],
+  additionalProperties: false,
+  properties: {
+    todo: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string'},
+          text: { type: 'string'}
+        },
+        required: ['_id', 'text'],
+        additionalProperties: false,
+      }
+    },
+    done: {
+      type: 'array',
+      items: {
+        properties: {
+          _id: { type: 'string'},
+          text: { type: 'string'}
+        },
+        required: ['_id', 'text'],
+        additionalProperties: false,
+      }
+    }
+  }
+}
+
 
 /**
  * findEmployeeById
  * @swagger
- * /api/employees/{id}:
+ * /api/employees/{empId}:
  *   get:
  *     tags:
  *       - Employees
@@ -153,16 +195,6 @@ router.get("/:empId/tasks", (req, res, next) => {
   }
 })
 
-//Task schema for validation, object requires a text string variable and to have no additional properties
-const taskSchema = {
-  type: 'object',
-  properties:{
-    text: { type: 'string'}
-  },
-  required: ["text"],
-  additionalProperties: false
-}
-
 /**
  * createTask
  * @openapi
@@ -266,6 +298,214 @@ router.post("/:empId/tasks", (req, res, next) => {
     //If an error occurs, output a message to the console and pass the error to the error handler
     console.error('err', err)
     next(err);
+  }
+});
+
+/**
+ * updateTask
+ * @openapi
+ * /api/employees/{empId}/tasks:
+ *   put:
+ *     tags:
+ *       - Employees
+ *     name: updateTask
+ *     description: API for updating an existing document in MongoDB.
+ *     summary: Updates an employee's todo and done lists.
+ *     parameters:
+ *       - name: empId
+ *         in: path
+ *         required: true
+ *         description: Id to filter the collection by.
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: Updated task arrays
+ *       content:
+ *         application/json:
+ *           schema:
+ *             required:
+ *               - todo
+ *               - done
+ *             properties:
+ *               todo:
+ *                 type: array
+ *                 items:
+ *                    type: object
+ *                    properties:
+ *                      _id:
+ *                        type: string
+ *                      text:
+ *                        type: string
+ *               done:
+ *                 type: array
+ *                 items:
+ *                    type: object
+ *                    properties:
+ *                      _id:
+ *                        type: string
+ *                      text:
+ *                        type: string
+ *     responses:
+ *       '204':
+ *         description: Task Updated
+ *       '400':
+ *         description: Bad Request
+ *       '404':
+ *         description: Not FOund
+ *       '500':
+ *         description: Internal Server Error
+ */
+router.put('/:empId/tasks', (req, res, next) => {
+  try{
+    //Set the empId based on the req.params and parse it as an int
+    let { empId } = req.params;
+    empId = parseInt(empId, 10);
+    console.log('empId', empId);
+
+    //If empId is not a number, cause an error stating so
+    if(isNaN(empId)){
+      const err = new Error("Input must be a number");
+      err.status = 400;
+      console.error("err", err);
+      next(err)
+      return
+    }
+
+    //Use AJV to create a validator using the tasksSchema and set a variable to determine if the request is valid
+    const validator = ajv.compile(tasksSchema)
+    const isValid = validator(req.body)
+
+    //If the request doesn't fit the required format, cause an error stating that it was a bad request
+    if(!isValid){
+      const err = new Error("Bad Request")
+      err.status = 400;
+      err.errors = validator.errors;
+      console.error("err", err)
+      next(err)
+      return
+    }
+
+    //Query the database to find an employee with the requested ID
+    mongo(async db => {
+      const employee = await db.collection('employees').findOne({ empId })
+
+      //If no employee is found, cause an error stating so
+      if (!employee){
+        const err = new Error('Unable to find employee with empId ' + empId)
+        err.status = 404;
+        console.error("err", err);
+        next(err)
+        return
+      }
+
+      //Once the employee is found, update the employee document and use set to change the task arrays
+      const result = await db.collection('employees').updateOne(
+        { empId },
+        { $set: {todo: req.body.todo, done: req.body.done}}
+      )
+
+      //If the result variable was not successfully modified, cause an error stating that no tasks were updated
+      if(!result.modifiedCount){
+        const err = new Error('Unable to update tasks for EmpId ' + empId)
+        err.status = 500
+        console.error('err', err)
+        next(err)
+        return;
+      }
+
+      //Send a successful 204 response
+      res.status(204).send()
+    }, next)
+
+  } catch (err) {
+    //If an error occurs, send it to the console and the error handler
+    console.error('err', err)
+    next(err);
+  }
+})
+
+/**
+ * deleteTask
+ * @openapi
+ * /api/employees/{empId}/tasks/{taskId}:
+ *   delete:
+ *     tags:
+ *       - Employees
+ *     name: deleteTask
+ *     description: API for deleting a document from MongoDB.
+ *     summary: Removes a document from MongoDB.
+ *     parameters:
+ *       - name: empId
+ *         in: path
+ *         required: true
+ *         description: Id of the employee whose task is being deleted.
+ *         schema:
+ *           type: string
+ *       - name: taskId
+ *         in: path
+ *         required: true
+ *         description: Id of the task is being deleted.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '204':
+ *         description: Task deleted
+ *       '400':
+ *         description: Bad Request
+ *       '404':
+ *         description: Not Found
+ *       '500':
+ *         description: Internal Server Error
+ */
+router.delete("/:empId/tasks/:taskId", (req, res, next) => {
+  try{
+    //Get the empId and taskId from the req.params and parse empId as an int
+    let { empId, taskId } = req.params
+    empId = parseInt(empId, 10)
+
+    //If the received empId is not a number, cause an error saying so
+    if(isNaN(empId)){
+      const err = new Error("Input must be a number");
+      err.status = 400;
+      console.error("err", err);
+      next(err)
+      return
+    }
+
+    //Query the database for an employee with the matching id number
+    mongo(async db => {
+      const employee = await db.collection('employees').findOne({ empId })
+
+      //If no matching employee is found, cause an error saying that the employee could not be found
+      if (!employee){
+        const err = new Error('Unable to find employee with empId ' + empId)
+        err.status = 404;
+        console.error("err", err);
+        next(err)
+        return
+      }
+
+      //If the todo or done lists are not present, initialize them as an empty array
+      if(!employee.todo) employee.todo = []
+      if(!employee.done) employee.done = []
+
+      //Filter the todo and done arrays to delete the task
+      const todo = employee.todo.filter(task => task._id.toString() !== taskId.toString())
+      const done = employee.done.filter(task => task._id.toString() !== taskId.toString())
+
+      //Update the collection with the result of the deletion
+      const result = await db.collection('employees').updateOne(
+        { empId },
+        { $set: { todo: todo, done: done}}
+      )
+
+      //Send a 204 success as a response
+      res.status(204).send()
+    }, next)
+  } catch(err){
+    //In the event of an error, send it to the console and to the error handler
+    console.error('err', err)
+    next(err)
   }
 })
 

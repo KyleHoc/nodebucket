@@ -18,6 +18,9 @@ import { FooterComponent } from './layouts/footer/footer.component';
 import { TasksComponent } from './tasks/tasks.component';
 import { ContactComponent } from './contact/contact.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AboutComponent } from './about/about.component';
+import { NotFoundComponent } from './not-found/not-found.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 //Create and export app module
 @NgModule({
@@ -29,13 +32,16 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     FooterComponent,
     TasksComponent,
     ContactComponent,
+    AboutComponent,
+    NotFoundComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    DragDropModule
   ],
   providers: [],
   bootstrap: [AppComponent]

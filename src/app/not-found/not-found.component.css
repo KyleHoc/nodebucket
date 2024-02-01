@@ -1,0 +1,48 @@
+.not-found-container{
+  background-color: #343F4B;
+  margin-top: 5%;
+  font-family: "Lato", sans-serif;
+}
+
+h1{
+  color:#FFD740;
+  font-size: 125px;
+  font-weight: 900;
+}
+
+p{
+  font-size: 1.5rem;
+  color:#FFD740;
+  font-weight: 900;
+}
+
+span{
+  font-size: 150px;
+}
+
+.left{
+  margin-right: 10%;
+}
+
+.right{
+  margin-left: 10%;
+}
+
+.reasons{
+ margin-left: 27%;
+}
+
+img{
+  height: 30%;
+  width: 25%;
+  margin-top: 1%;
+  margin-bottom: 1%;
+}
+
+.source{
+  font-size: 0.8rem;
+}
+
+a{
+  color:#FFD740
+}
